@@ -32,7 +32,7 @@ class Comparaison:
 
     def __init__(self, layer, user):
         nb_images= rqr.days_of_archieve * 96
-        max_possible_combinations = rqr.nb_users * nb_images**2
+        max_possible_combinations = rqr.nb_users * nb_images**4
         count = 0
         while True :
             if count >  max_possible_combinations:

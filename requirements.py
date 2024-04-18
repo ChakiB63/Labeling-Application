@@ -9,3 +9,6 @@ days_of_archieve=1/32 #in order to set a condition to stop the program if the ma
 nb_users = 2
 
 
+# le choix aléatoires peut prendre du temps
+# le retour en haut de page apres l'ajout
+# vue side-by-side

@@ -5,8 +5,11 @@ from model.Phenomena import Phenomena
 from model.Image import Image 
 from model.Comparaison import Comparaison
 
+import hmac
+
 @st.cache_data()
 def generate_comparaison(layer, _user):
+    print(_user)
     return Comparaison(layer, _user)
 
 def phenomena_infos(phenomena_presence, phenomena_nimg): # the second argument t encouter the exception of checkbox with the same key values
@@ -33,29 +36,53 @@ def phenomena_infos(phenomena_presence, phenomena_nimg): # the second argument t
                         st.checkbox("SO", key=phenomena_nimg+"_SO",disabled=True)
                     return [False, False, False, False]
 
+def check_password():
+    """Returns `True` if the user had a correct password."""
 
-@st.cache_data()
-def test_cache():
-    print("cache")
+    def login_form():
+        """Form with widgets to collect user information"""
+        with st.form("Credentials"):
+            st.text_input("Username", key="username")
+            st.text_input("Password", type="password", key="password")
+            st.form_submit_button("Log in", on_click=password_entered)
+        #return user
 
-user = "cb"
-use = "bd"
+
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if st.session_state["username"] in st.secrets[
+            "passwords"
+        ] and hmac.compare_digest(
+            st.session_state["password"],
+            st.secrets.passwords[st.session_state["username"]],
+        ):
+            st.session_state["user"] = st.session_state["username"]
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store the username or password.
+            del st.session_state["username"]
+        else:
+            st.session_state["password_correct"] = False
+
+    # Return True if the username + password is validated.
+    if st.session_state.get("password_correct", False):
+        return True
+
+    # Show inputs for username + password.
+    login_form()
+    if "password_correct" in st.session_state:
+        st.error("User not known or password incorrect")
+    return False
+
+
 # Define your Streamlit app layout
 def main():
+
+    if not check_password():
+        st.stop()
     
     st.set_page_config(layout="wide")
 
-    st.session_state.user = user
-    if st.button("test"):
-        print(st.session_state.user)
-        #test_cache
-        
-
-    #st.html('<h1>Application de comparaison des image satellitaires</h1>')
     st.header('Application pour l\'évaluation de similarité des images satellitaires', divider= 'rainbow')
-
-    # st.toggle("Vue côte-à-côte"):
-
     
     # The selectbox to choose the layer of the images
     layers = np.array(['Airmass', 'Convection', 'Dust', 'NaturalEnhncd'])
@@ -63,7 +90,7 @@ def main():
     layer = layer.lower()
 
     # Generating the pictures or a message informing that all the images were compared
-    comparaison = generate_comparaison(layer, user) #pour avoir une cache
+    comparaison = generate_comparaison(layer, st.session_state.user) #pour avoir une cache
     if comparaison.get_fin_archive() : 
             st.warning("Toutes les images contenues dans l'archive pour ce spectre ont été comparés. Merci pour vos efforts.  \nPour plus d'informations, contacter votre assistant technique.")
             st.stop()
@@ -72,16 +99,16 @@ def main():
     _,co1, co2 = st.columns([1,5,5],gap="medium")
     with co1:
         st.image(comparaison.get_img1(), caption=comparaison.get_dt1())
-        image1 = Image(comparaison.get_dt1(), user)
-        ex1 = image1.verify_existence(user)
+        image1 = Image(comparaison.get_dt1(), st.session_state.user)
+        ex1 = image1.verify_existence(st.session_state.user)
         if ex1:
                 st.info("Les informations sur cette images ont été saisies précédement.")
         else:
             phenomena_presence1  = st.radio("Présence des phénomènes dans l'image à gauche : ", ["Oui", "Non"],horizontal=True)
     with co2:
         st.image(comparaison.get_img2(), caption=comparaison.get_dt2())
-        image2 = Image(comparaison.get_dt2(), user)
-        ex2 = image2.verify_existence(user)
+        image2 = Image(comparaison.get_dt2(), st.session_state.user)
+        ex2 = image2.verify_existence(st.session_state.user)
         if ex2:
             st.info("Les informations sur cette images ont été saisies précédement.")
         else:
