@@ -2,14 +2,13 @@ from datetime import datetime
 import pandas as pd
 import os
 import random
-
 import streamlit as st
-
+import requirements as rqr
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
 def generate_random_pic(layer):
-    str_file = random.choice(os.listdir(st.secrets.path_to_archieve+"/msg_fes_rgb_"+layer))
+    str_file = random.choice(os.listdir(rqr.path_to_archieve+"/msg_fes_rgb_"+layer))
     return str_file
 
 def regularize_str(_arg):
@@ -22,7 +21,7 @@ def file_to_datetime(filename):
     return dt
 
 def verify_existence(layer, datetime1, datetime2, user):
-    layer_df = pd.read_excel(st.secrets.paths.path_to_excel, sheet_name=layer, header=0)
+    layer_df = pd.read_excel(rqr.path_to_excel, sheet_name=layer, header=0)
     for irow in range(len(layer_df)):
         if layer_df.iloc[irow,4] == user :
             if (layer_df.iloc[irow,0] == datetime1 and layer_df.iloc[irow,1] == datetime2) or (layer_df.iloc[irow,0] == datetime2 and layer_df.iloc[irow,1] == datetime1):
@@ -32,7 +31,7 @@ def verify_existence(layer, datetime1, datetime2, user):
 class Comparaison:
 
     def __init__(self, layer, user):
-        nb_images= st.secrets.days_of_archieve * 96
+        nb_images= rqr.days_of_archieve * 96
         max_possible_combinations = len(st.secrets["passwords"]) * nb_images**4
         count = 0
         while True :
@@ -50,8 +49,8 @@ class Comparaison:
                 self._layer = layer
                 self._dt1 = dt1
                 self._dt2 = dt2
-                self._img1 = st.secrets.path_to_archieve+"/msg_fes_rgb_"+layer+"/"+img1
-                self._img2 = st.secrets.path_to_archieve+"/msg_fes_rgb_"+layer+"/"+img2
+                self._img1 = rqr.path_to_archieve+"/msg_fes_rgb_"+layer+"/"+img1
+                self._img2 = rqr.path_to_archieve+"/msg_fes_rgb_"+layer+"/"+img2
                 self._user = user
                 break
             
@@ -106,11 +105,11 @@ class Comparaison:
 
 
     def add(self):
-        workbook = load_workbook(st.secrets.path_to_excel)
+        workbook = load_workbook(rqr.path_to_excel)
         sheet = workbook[self.get_layer()]
         nouvelle_ligne = [self.get_dt1(), self.get_dt2(), self.get_percentage(), self.get_label(), self.get_user(), datetime.now().isoformat()]
         new_df = pd.DataFrame([nouvelle_ligne], columns=['Datetime1', 'Datetime2', 'Similarity_percentage', 'Similarity_label','User','DatetimeAdded'])
         for row in dataframe_to_rows(new_df, index=False, header=False):
             sheet.append(row)
 
-        workbook.save(st.secrets.path_to_excel)
+        workbook.save(rqr.path_to_excel)

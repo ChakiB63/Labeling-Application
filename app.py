@@ -8,9 +8,9 @@ from model.Comparaison import Comparaison
 import hmac
 
 @st.cache_data()
-def generate_comparaison(layer, _user):
-    print(_user)
-    return Comparaison(layer, _user)
+def generate_comparaison(layer, user):
+    print(user)
+    return Comparaison(layer, user)
 
 def phenomena_infos(phenomena_presence, phenomena_nimg): # the second argument t encouter the exception of checkbox with the same key values
                 if phenomena_presence=="Oui":
@@ -50,12 +50,7 @@ def check_password():
 
     def password_entered():
         """Checks whether a password entered by the user is correct."""
-        if st.session_state["username"] in st.secrets[
-            "passwords"
-        ] and hmac.compare_digest(
-            st.session_state["password"],
-            st.secrets.passwords[st.session_state["username"]],
-        ):
+        if st.session_state["username"] in st.secrets["passwords"] and hmac.compare_digest(st.session_state["password"],st.secrets.passwords[st.session_state["username"]]):
             st.session_state["user"] = st.session_state["username"]
             st.session_state["password_correct"] = True
             del st.session_state["password"]  # Don't store the username or password.
@@ -102,7 +97,7 @@ def main():
         image1 = Image(comparaison.get_dt1(), st.session_state.user)
         ex1 = image1.verify_existence(st.session_state.user)
         if ex1:
-                st.info("Les informations sur cette images ont été saisies précédement.")
+                st.info("Les informations des phénomènes présents dans cette image ont été saisies précédement.")
         else:
             phenomena_presence1  = st.radio("Présence des phénomènes dans l'image à gauche : ", ["Oui", "Non"],horizontal=True)
     with co2:

@@ -1,7 +1,6 @@
 from datetime import datetime
 import pandas as pd
-import streamlit as st
-
+import requirements as rqr
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
@@ -69,7 +68,7 @@ class Image:
         self._cold_drop = value
 
     def verify_existence(self, user):
-        df = pd.read_excel(st.secrets.path_to_excel, sheet_name="phenomena_infos", header=0)
+        df = pd.read_excel(rqr.path_to_excel, sheet_name="phenomena_infos", header=0)
         for irow in range(len(df)):
             if df.iloc[irow,1] == user :
                 if df.iloc[irow,0] == self.get_dt() :
@@ -77,7 +76,7 @@ class Image:
         return False
 
     def add(self):
-        workbook = load_workbook(st.secrets.path_to_excel)
+        workbook = load_workbook(rqr.path_to_excel)
         sheet = workbook["phenomena_infos"]
 
         nouvelle_ligne = [self.get_dt(), self.get_user(), datetime.now().isoformat(), self.get_phenomena_presence()]+self.get_convection().infos_list()+self.get_dust().infos_list()+self.get_fog().infos_list()+self.get_fire_forest().infos_list()+self.get_cold_drop().infos_list()
@@ -90,4 +89,4 @@ class Image:
         for row in dataframe_to_rows(new_df, index=False, header=False):
             sheet.append(row)
 
-        workbook.save(st.secrets.path_to_excel)
+        workbook.save(rqr.path_to_excel)
