@@ -9,6 +9,7 @@ import hmac
 
 @st.cache_data()
 def generate_comparaison(layer, user):
+    Comparaison.generate_lists()
     print(user)
     return Comparaison(layer, user)
 

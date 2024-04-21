@@ -1,4 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from math import comb
+from itertools import combinations
+import numpy as np
 import pandas as pd
 import os
 import random
@@ -14,6 +17,9 @@ def generate_random_pic(layer):
 def regularize_str(_arg):
     _arg=':'.join(_arg.split('_'))
     return _arg
+def regularize_dt(_arg):
+    _arg='_'.join(_arg.split(':'))
+    return _arg
 
 def file_to_datetime(filename):
     str_dt = filename[:-5][-19:] # to eleminate the extension and the Z added at the end of the name files.
@@ -28,36 +34,101 @@ def verify_existence(layer, datetime1, datetime2, user):
                 return True
     return False
 
-class Comparaison:
 
-    def __init__(self, layer, user):
-        nb_images= rqr.days_of_archieve * 96
-        max_possible_combinations = len(st.secrets["passwords"]) * nb_images**4
+class Comparaison:
+    list_times = []
+    """
+    list_airmass = []
+    list_convection = []
+    list_dust = []
+    list_naturalenhncd = []
+    """
+    @staticmethod
+    def generate_lists():
+        l = []
+        start = datetime.fromisoformat(regularize_str(rqr.dtstart))
+        end = datetime.fromisoformat(regularize_str(rqr.dtend))
+        step = timedelta(minutes=15)
+        while start <= end :
+            l.append(regularize_dt(start.isoformat()))
+            start += step
+        Comparaison.list_times = list(combinations(l,2))
+        np.random.seed(1)
+        np.random.shuffle(Comparaison.list_times)
+
+        """
+        
+        Comparaison.list_airmass = list(combinations(['image_airmass_msg_fes_rgb_'+k+'Z' for k in l],2))
+        np.random.shuffle(Comparaison.list_airmass)
+        np.random.seed(2)
+        Comparaison.list_convection = list(combinations(['image_convection_msg_fes_rgb_'+k+'Z' for k in l],2))
+        np.random.shuffle(Comparaison.list_convection)
+        np.random.seed(3)
+        Comparaison.list_dust = list(combinations(['image_dust_msg_fes_rgb_'+k+'Z' for k in l],2))
+        np.random.shuffle(Comparaison.list_dust)
+        np.random.seed(4)
+        Comparaison.list_naturalenhncd = list(combinations(['image_naturalenhncd_msg_fes_rgb_'+k+'Z' for k in l],2))
+        np.random.shuffle(Comparaison.list_naturalenhncd)
+        """
+
+    def generate_combination(self, layer, user):
+        layer_df = pd.read_excel(rqr.path_to_excel, sheet_name=layer, header=0)
         count = 0
-        while True :
-            if count >  max_possible_combinations:
-                self._fin_archive = True
-                break
-            
-            img1 = generate_random_pic(layer)
-            img2 =  generate_random_pic(layer)
+        for irow in range(len(layer_df)):
+            if layer_df.iloc[irow,4] == user :
+                count+=1
+
+        try: 
+            return ('image_msg_fes_rgb_'+layer+'_'+self.list_times[count][0]+'Z.png', 'image_msg_fes_rgb_'+layer+'_'+self.list_times[count][1]+'Z.png')
+        except:
+            return None
+        
+    """
+    try:
+        if layer == 'convection' :
+            return Comparaison.list_convection[count]
+        elif layer == 'dust':
+            return Comparaison.list_dust[count]
+        elif layer == 'naturalenhncd' :
+            return Comparaison.list_naturalenhncd[count]
+        elif layer == 'airmass' :
+            return Comparaison.list_airmass[count]
+    except:
+        return None
+    """
+    
+    def __init__(self, layer, user):
+
+        """
+        self.list_airmass = Comparaison.list_airmass
+        self.list_convection = Comparaison.list_convection
+        self.list_dust = Comparaison.list_dust
+        self.list_naturalenhncd = Comparaison.list_naturalenhncd
+        """
+
+        self._list_times = Comparaison.list_times
+
+        img = self.generate_combination(layer, user)
+
+        if not img:
+            self._fin_archive = True
+        
+        else :
+            img1 = img[0]
+            img2 = img[1]
 
             dt1 = file_to_datetime(img1)
             dt2 = file_to_datetime(img2)
-            if not verify_existence(layer, dt1, dt2, user) and dt1!=dt2:
-                self._fin_archive = False
-                self._layer = layer
-                self._dt1 = dt1
-                self._dt2 = dt2
-                self._img1 = rqr.path_to_archieve+"/msg_fes_rgb_"+layer+"/"+img1
-                self._img2 = rqr.path_to_archieve+"/msg_fes_rgb_"+layer+"/"+img2
-                self._user = user
-                break
-            
-            count+=1
 
-        
-    
+            self._fin_archive = False
+            self._layer = layer
+            self._dt1 = dt1
+            self._dt2 = dt2
+            self._img1 = rqr.path_to_archieve+"/msg_fes_rgb_"+layer+"/"+img1
+            self._img2 = rqr.path_to_archieve+"/msg_fes_rgb_"+layer+"/"+img2
+            self._user = user
+            
+
     # Getters
     def get_layer(self):
         return self._layer
