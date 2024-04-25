@@ -1,5 +1,8 @@
 from datetime import datetime
 import pandas as pd
+import sys
+from os import path
+sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
 import requirements as rqr
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -10,16 +13,16 @@ class Image:
     def __init__(self, dt, user):
         self._dt = dt
         self._user = user
-    """
-    def __init__(self, dt, presence, convection,dust,fog,fire_forest,cold_drop):
-        self._dt = dt
-        self._presence = presence
-        self._convection = convection
-        self._dust = dust
-        self._fog = fog
-        self._fire_forest = fire_forest
-        self._cold_drop = cold_drop
-    """
+    
+    # def __init__(self, dt, presence, convection,dust,fog,fire_forest,cold_drop):
+    #     self._dt = dt
+    #     self._presence = presence
+    #     self._convection = convection
+    #     self._dust = dust
+    #     self._fog = fog
+    #     self._fire_forest = fire_forest
+    #     self._cold_drop = cold_drop
+
     def get_dt(self):
         return self._dt
     
@@ -90,3 +93,14 @@ class Image:
             sheet.append(row)
 
         workbook.save(rqr.path_to_excel)
+
+# Comparaison.generate_lists()
+# c1 = Comparaison("airmass","user")
+# print(c1._dt1)
+# print(c1._img1)
+# print(c1._layer)
+# print(Comparaison.list_times)
+# image1 = Image(c1.get_dt1(), "user")
+# i = Image('2020-09-01T00_00_00', "user")
+# print(image1.get_user())
+# print(image1._dt)

@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
-from math import comb
 from itertools import combinations
 import numpy as np
 import pandas as pd
 import os
 import random
 import streamlit as st
+import sys
+from os import path
+sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
 import requirements as rqr
 from openpyxl import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -37,74 +39,21 @@ def verify_existence(layer, datetime1, datetime2, user):
 
 class Comparaison:
     list_times = []
-    """
-    list_airmass = []
-    list_convection = []
-    list_dust = []
-    list_naturalenhncd = []
-    """
-    @staticmethod
-    def generate_lists():
-        l = []
-        start = datetime.fromisoformat(regularize_str(rqr.dtstart))
-        end = datetime.fromisoformat(regularize_str(rqr.dtend))
-        step = timedelta(minutes=15)
-        while start <= end :
-            l.append(regularize_dt(start.isoformat()))
-            start += step
-        Comparaison.list_times = list(combinations(l,2))
-        np.random.seed(1)
-        np.random.shuffle(Comparaison.list_times)
-
-        """
-        
-        Comparaison.list_airmass = list(combinations(['image_airmass_msg_fes_rgb_'+k+'Z' for k in l],2))
-        np.random.shuffle(Comparaison.list_airmass)
-        np.random.seed(2)
-        Comparaison.list_convection = list(combinations(['image_convection_msg_fes_rgb_'+k+'Z' for k in l],2))
-        np.random.shuffle(Comparaison.list_convection)
-        np.random.seed(3)
-        Comparaison.list_dust = list(combinations(['image_dust_msg_fes_rgb_'+k+'Z' for k in l],2))
-        np.random.shuffle(Comparaison.list_dust)
-        np.random.seed(4)
-        Comparaison.list_naturalenhncd = list(combinations(['image_naturalenhncd_msg_fes_rgb_'+k+'Z' for k in l],2))
-        np.random.shuffle(Comparaison.list_naturalenhncd)
-        """
-
-    def generate_combination(self, layer, user):
-        layer_df = pd.read_excel(rqr.path_to_excel, sheet_name=layer, header=0)
-        count = 0
-        for irow in range(len(layer_df)):
-            if layer_df.iloc[irow,4] == user :
-                count+=1
-
-        try: 
-            return ('image_msg_fes_rgb_'+layer+'_'+self.list_times[count][0]+'Z.png', 'image_msg_fes_rgb_'+layer+'_'+self.list_times[count][1]+'Z.png')
-        except:
-            return None
-        
-    """
-    try:
-        if layer == 'convection' :
-            return Comparaison.list_convection[count]
-        elif layer == 'dust':
-            return Comparaison.list_dust[count]
-        elif layer == 'naturalenhncd' :
-            return Comparaison.list_naturalenhncd[count]
-        elif layer == 'airmass' :
-            return Comparaison.list_airmass[count]
-    except:
-        return None
-    """
+    
+    # list_airmass = []
+    # list_convection = []
+    # list_dust = []
+    # list_naturalenhncd = []
+    
     
     def __init__(self, layer, user):
 
-        """
-        self.list_airmass = Comparaison.list_airmass
-        self.list_convection = Comparaison.list_convection
-        self.list_dust = Comparaison.list_dust
-        self.list_naturalenhncd = Comparaison.list_naturalenhncd
-        """
+        
+        # self.list_airmass = Comparaison.list_airmass
+        # self.list_convection = Comparaison.list_convection
+        # self.list_dust = Comparaison.list_dust
+        # self.list_naturalenhncd = Comparaison.list_naturalenhncd
+        
 
         self._list_times = Comparaison.list_times
 
@@ -173,7 +122,57 @@ class Comparaison:
 
     def set_label(self, value):
         self._label = value
+    
+    @staticmethod
+    def generate_lists():
+        l = []
+        start = datetime.fromisoformat(regularize_str(rqr.dtstart))
+        end = datetime.fromisoformat(regularize_str(rqr.dtend))
+        step = timedelta(minutes=15)
+        while start <= end :
+            l.append(regularize_dt(start.isoformat()))
+            start += step
+        Comparaison.list_times = list(combinations(l,2))
+        np.random.seed(1)
+        np.random.shuffle(Comparaison.list_times)
+        
+        # Comparaison.list_airmass = list(combinations(['image_airmass_msg_fes_rgb_'+k+'Z' for k in l],2))
+        # np.random.shuffle(Comparaison.list_airmass)
+        # np.random.seed(2)
+        # Comparaison.list_convection = list(combinations(['image_convection_msg_fes_rgb_'+k+'Z' for k in l],2))
+        # np.random.shuffle(Comparaison.list_convection)
+        # np.random.seed(3)
+        # Comparaison.list_dust = list(combinations(['image_dust_msg_fes_rgb_'+k+'Z' for k in l],2))
+        # np.random.shuffle(Comparaison.list_dust)
+        # np.random.seed(4)
+        # Comparaison.list_naturalenhncd = list(combinations(['image_naturalenhncd_msg_fes_rgb_'+k+'Z' for k in l],2))
+        # np.random.shuffle(Comparaison.list_naturalenhncd)
+    
 
+    def generate_combination(self, layer, user):
+        layer_df = pd.read_excel(rqr.path_to_excel, sheet_name=layer, header=0)
+        count = 0
+        for irow in range(len(layer_df)):
+            if layer_df.iloc[irow,4] == user :
+                count+=1
+
+        try: 
+            return ('image_msg_fes_rgb_'+layer+'_'+self.list_times[count][0]+'Z.png', 'image_msg_fes_rgb_'+layer+'_'+self.list_times[count][1]+'Z.png')
+        except:
+            return None
+        
+    
+    # try:
+    #     if layer == 'convection' :
+    #         return Comparaison.list_convection[count]
+    #     elif layer == 'dust':
+    #         return Comparaison.list_dust[count]
+    #     elif layer == 'naturalenhncd' :
+    #         return Comparaison.list_naturalenhncd[count]
+    #     elif layer == 'airmass' :
+    #         return Comparaison.list_airmass[count]
+    # except:
+    #     return None
 
     def add(self):
         workbook = load_workbook(rqr.path_to_excel)
@@ -184,3 +183,10 @@ class Comparaison:
             sheet.append(row)
 
         workbook.save(rqr.path_to_excel)
+
+# Comparaison.generate_lists()
+# c1 = Comparaison("airmass","user")
+# print(c1._dt1)
+# print(c1._img1)
+# print(c1._layer)
+# print(Comparaison.list_times)
