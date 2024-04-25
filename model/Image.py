@@ -10,10 +10,11 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 
 class Image:
 
-    def __init__(self, dt, user):
+    def __init__(self, dt, user, layer):
         self._dt = dt
         self._user = user
-    
+        self._layer = layer
+
     # def __init__(self, dt, presence, convection,dust,fog,fire_forest,cold_drop):
     #     self._dt = dt
     #     self._presence = presence
@@ -47,6 +48,9 @@ class Image:
     def get_user(self):
         return self._user
     
+    def get_layer(self):
+        return self._layer
+    
 
 
     def set_dt(self,value):
@@ -70,20 +74,19 @@ class Image:
     def set_cold_drop(self,value):
         self._cold_drop = value
 
-    def verify_existence(self, user):
+    def verify_existence(self):
         df = pd.read_excel(rqr.path_to_excel, sheet_name="phenomena_infos", header=0)
         for irow in range(len(df)):
-            if df.iloc[irow,1] == user :
-                if df.iloc[irow,0] == self.get_dt() :
-                    return True
+            if df.iloc[irow,0] == self.get_dt() and df.iloc[irow,1] == self.get_user() and df.iloc[irow,3] == self.get_layer() :
+                return True
         return False
 
     def add(self):
         workbook = load_workbook(rqr.path_to_excel)
         sheet = workbook["phenomena_infos"]
 
-        nouvelle_ligne = [self.get_dt(), self.get_user(), datetime.now().isoformat(), self.get_phenomena_presence()]+self.get_convection().infos_list()+self.get_dust().infos_list()+self.get_fog().infos_list()+self.get_fire_forest().infos_list()+self.get_cold_drop().infos_list()
-        new_df = pd.DataFrame([nouvelle_ligne], columns=["Datetime", "User", "DatetimeAdded", "Phenomena_presence", 
+        nouvelle_ligne = [self.get_dt(), self.get_user(), datetime.now().isoformat(), self.get_layer(), self.get_phenomena_presence()]+self.get_convection().infos_list()+self.get_dust().infos_list()+self.get_fog().infos_list()+self.get_fire_forest().infos_list()+self.get_cold_drop().infos_list()
+        new_df = pd.DataFrame([nouvelle_ligne], columns=["Datetime", "User", "DatetimeAdded", "Layer", "Phenomena_presence", 
                                                         "Convection_phenomena","Convection_NW","Convection_NE","Convection_SE","Convection_SW",
                                                         "Dust_phenomena","Dust_NW","Dust_NE","Dust_SE","Dust_SW",
                                                         "Fog_phenomena","Fog_NW","Fog_NE","Fog_SE","Fog_SW",
