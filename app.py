@@ -12,7 +12,6 @@ import hmac
 @st.cache_data()
 def generate_comparaison(layer, user):
     Comparaison.generate_lists()
-    print(user)
     return Comparaison(layer, user)
 
 def phenomena_infos(phenomena_presence, phenomena_nimg): # the second argument t encouter the exception of checkbox with the same key values
